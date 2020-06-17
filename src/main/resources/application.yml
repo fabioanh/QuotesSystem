@@ -1,0 +1,14 @@
+server:
+  port : 8081
+
+providers:
+  url: ws://localhost:8080
+
+logging:
+  level:
+    root: ERROR
+    org.springframework.web: ERROR
+    com.traderepublic: DEBUG
+    org.apache.tomcat.websocket.WsFrameClient: DEBUG
+    org.springframework.messaging: DEBUG
+    org.springframework.web.socket: DEBUG

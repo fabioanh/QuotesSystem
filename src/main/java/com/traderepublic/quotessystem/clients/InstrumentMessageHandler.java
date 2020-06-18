@@ -16,8 +16,12 @@ public class InstrumentMessageHandler implements ProvidersMessageHandler {
 
     @Override
     public void handleMessage(String message) {
-        Type collectionType = new TypeToken<Message<Instrument>>(){}.getType();
-        Message<Instrument> myJson = new Gson().fromJson(message, collectionType);
-        LOGGER.debug("Data successfully parsed {}", myJson.getData());
+        //TODO: Implement further handling
+    }
+
+    @Override
+    public Message<Instrument> parseMessage(String message) {
+
+        return new Gson().fromJson(message, new TypeToken<Message<Instrument>>(){}.getType());
     }
 }

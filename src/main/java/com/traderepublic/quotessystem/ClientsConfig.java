@@ -44,7 +44,7 @@ public class ClientsConfig {
                 URI.create(url),
                 session -> session.receive()
                         .map(WebSocketMessage::getPayloadAsText)
-                        .doOnNext(messageHandler::handleMessage)
+                        .map(messageHandler::parseMessage)
                         .then()
         ).subscribe();
         return client;

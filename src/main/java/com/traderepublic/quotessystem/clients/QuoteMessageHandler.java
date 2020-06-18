@@ -2,6 +2,7 @@ package com.traderepublic.quotessystem.clients;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.traderepublic.quotessystem.clients.messages.Instrument;
 import com.traderepublic.quotessystem.clients.messages.Message;
 import com.traderepublic.quotessystem.clients.messages.Quote;
 import org.slf4j.Logger;
@@ -16,8 +17,11 @@ public class QuoteMessageHandler implements ProvidersMessageHandler{
 
     @Override
     public void handleMessage(String message) {
-        Type collectionType = new TypeToken<Message<Quote>>(){}.getType();
-        Message<Quote> myJson = new Gson().fromJson(message, collectionType);
-        LOGGER.info("Data successfully parsed {}", myJson.getData());
+        //TODO: Implement further handling
+    }
+
+    @Override
+    public Message parseMessage(String message) {
+        return new Gson().fromJson(message, new TypeToken<Message<Quote>>(){}.getType());
     }
 }

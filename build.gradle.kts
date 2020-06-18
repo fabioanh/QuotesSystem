@@ -37,6 +37,9 @@ dependencies {
     // Gson
     implementation("com.google.code.gson:gson:2.8.6")
 
+    // Elasticsearch
+    implementation("org.elasticsearch:elasticsearch:7.7.1")
+
     // Use JUnit Jupiter API for testing.
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
 

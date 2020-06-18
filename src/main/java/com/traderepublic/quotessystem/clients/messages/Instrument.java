@@ -1,8 +1,10 @@
 package com.traderepublic.quotessystem.clients.messages;
 
+import java.util.Objects;
+
 public class Instrument implements Data {
-    private String description;
-    private String isin;
+    private final String description;
+    private final String isin;
 
     public Instrument(String description, String isin) {
         this.description = description;
@@ -15,5 +17,19 @@ public class Instrument implements Data {
 
     public String getIsin() {
         return isin;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Instrument that = (Instrument) o;
+        return Objects.equals(description, that.description) &&
+                Objects.equals(isin, that.isin);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(description, isin);
     }
 }

@@ -3,8 +3,6 @@
  */
 package com.traderepublic.quotessystem;
 
-import com.traderepublic.quotessystem.clients.ProvidersClient;
-import com.traderepublic.quotessystem.clients.ProvidersSessionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

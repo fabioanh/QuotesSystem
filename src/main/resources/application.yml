@@ -4,14 +4,8 @@ server:
 providers:
   url: ws://localhost:8080
 
-elasticsearch:
-  host: localhost
-  port: 9200
-
 mongodb:
-  db: quotesSystem
-  host: localhost
-  port: 27017
+  uri: mongodb://localhost:27017
 
 logging:
   level:

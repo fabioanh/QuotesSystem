@@ -17,7 +17,6 @@ logging:
   level:
     root: ERROR
     org.springframework.web: ERROR
-    com.traderepublic: DEBUG
-    org.apache.tomcat.websocket.WsFrameClient: DEBUG
-    org.springframework.messaging: DEBUG
-    org.springframework.web.socket: DEBUG
+    com.traderepublic: INFO
+    org.springframework.messaging: ERROR
+    org.springframework.web.socket: ERROR

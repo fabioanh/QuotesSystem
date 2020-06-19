@@ -1,16 +1,12 @@
 package com.traderepublic.quotessystem.clients;
 
-import com.traderepublic.quotessystem.clients.messages.Instrument;
-import com.traderepublic.quotessystem.clients.messages.InstrumentMessage;
+import com.google.gson.JsonObject;
+import com.traderepublic.quotessystem.data.Instrument;
 import com.traderepublic.quotessystem.data.MongodbClient;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
 import java.time.Instant;
 
@@ -23,33 +19,62 @@ public class InstrumentsMessageHandlerTest {
     private MongodbClient mongodbClient;
 
     @BeforeEach
-    public void initMocks(){
+    public void initMocks() {
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
     public void testInstrumentParsing() {
-        Instant refTime = Instant.now();
-        InstrumentMessage expected = new InstrumentMessage(new Instrument("veri varius explicari", "GR0687573886"), "ADD", null);
-        InstrumentMessage response = messageHandler.parseMessage(sampleInstrumentMessage());
-        Assertions.assertEquals(expected.getData(), response.getData());
-        Assertions.assertEquals(expected.getType(), response.getType());
-        Assertions.assertTrue(expected.getTimestamp().isAfter(refTime));
+        // given
+        String expectedDescription = "veri varius explicari";
+        String expectedIsin = "GR0687573886";
+        String expectedType = "ADD";
+
+        // when
+        JsonObject response = messageHandler.parseMessage(sampleInstrumentMessage());
+
+        // then
+        Assertions.assertEquals(expectedDescription, response.get("data").getAsJsonObject().get("description").getAsString());
+        Assertions.assertEquals(expectedIsin, response.get("data").getAsJsonObject().get("isin").getAsString());
+        Assertions.assertEquals(expectedType, response.get("type").getAsString());
     }
 
     @Test
     public void testAddMessageHandling() {
-        InstrumentMessage message = messageHandler.parseMessage(sampleInstrumentMessage());
+        JsonObject message = messageHandler.parseMessage(sampleInstrumentMessage());
+        Instrument instrument = new Instrument(message.get("data").getAsJsonObject().get("isin").getAsString(),
+                message.get("data").getAsJsonObject().get("description").getAsString(),
+                Instant.now());
+
+        ArgumentCaptor<Instrument> argument = ArgumentCaptor.forClass(Instrument.class);
+
+        //when
         messageHandler.handleMessage(message);
-        Mockito.verify(mongodbClient).insertInstrument(message);
+
+        //then
+        Mockito.verify(mongodbClient).insertInstrument(argument.capture());
+        Assertions.assertEquals(instrument.getIsin(), argument.getValue().getIsin());
+        Assertions.assertEquals(instrument.getDescription(), argument.getValue().getDescription());
+
     }
 
     @Test
     public void testDeleteMessageHandling() {
-        InstrumentMessage message = messageHandler.parseMessage(deleteInstrumentMessage());
+        // given
+        JsonObject message = messageHandler.parseMessage(deleteInstrumentMessage());
+        Instrument instrument = new Instrument(message.get("data").getAsJsonObject().get("isin").getAsString(),
+                message.get("data").getAsJsonObject().get("description").getAsString(),
+                Instant.now());
+        ArgumentCaptor<Instrument> argument = ArgumentCaptor.forClass(Instrument.class);
+
+        // when
         messageHandler.handleMessage(message);
-        Mockito.verify(mongodbClient).deleteInstrument(message);
-        Mockito.verify(mongodbClient).deleteQuotesByIsin(message.getData().getIsin());
+
+        // then
+        Mockito.verify(mongodbClient).deleteInstrument(argument.capture());
+        Mockito.verify(mongodbClient).deleteQuotesByIsin(instrument.getIsin());
+        Assertions.assertEquals(instrument.getDescription(), argument.getValue().getDescription());
+        Assertions.assertEquals(instrument.getIsin(), argument.getValue().getIsin());
     }
 
     private String sampleInstrumentMessage() {

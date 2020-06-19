@@ -1,16 +1,12 @@
 package com.traderepublic.quotessystem.clients;
 
-import com.traderepublic.quotessystem.clients.messages.InstrumentMessage;
-import com.traderepublic.quotessystem.clients.messages.Quote;
-import com.traderepublic.quotessystem.clients.messages.QuoteMessage;
+import com.google.gson.JsonObject;
 import com.traderepublic.quotessystem.data.MongodbClient;
+import com.traderepublic.quotessystem.data.Quote;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -23,25 +19,44 @@ public class QuoteMessageHandlerTest {
     private MongodbClient mongodbClient;
 
     @BeforeEach
-    private void initMocks(){
+    private void initMocks() {
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
     public void testQuoteParsing() {
-        Instant refTime = Instant.now();
-        QuoteMessage expected = new QuoteMessage(new Quote(new BigDecimal("957.1053"), "HG1E56052525"), "QUOTE", null);
-        QuoteMessage response = messageHandler.parseMessage(sampleQuoteMessage());
-        Assertions.assertEquals(expected.getData(), response.getData());
-        Assertions.assertEquals(expected.getType(), response.getType());
-        Assertions.assertTrue(expected.getTimestamp().isAfter(refTime));
+        // given
+        BigDecimal expectedPrice = new BigDecimal("957.1053");
+        String expectedIsin = "HG1E56052525";
+        String expectedType = "QUOTE";
+
+        // when
+        JsonObject response = messageHandler.parseMessage(sampleQuoteMessage());
+
+        // then
+        Assertions.assertEquals(expectedPrice, new BigDecimal(response.get("data").getAsJsonObject().get("price").getAsString()));
+        Assertions.assertEquals(expectedIsin, response.get("data").getAsJsonObject().get("isin").getAsString());
+        ;
+        Assertions.assertEquals(expectedType, response.get("type").getAsString());
     }
 
     @Test
     public void testMessageHandling() {
-        QuoteMessage message = messageHandler.parseMessage(sampleQuoteMessage());
+
+        // given
+        JsonObject message = messageHandler.parseMessage(sampleQuoteMessage());
+        Quote quote = new Quote(message.get("data").getAsJsonObject().get("isin").getAsString(),
+                new BigDecimal(message.get("data").getAsJsonObject().get("price").getAsString()),
+                Instant.now());
+        ArgumentCaptor<Quote> argument = ArgumentCaptor.forClass(Quote.class);
+
+        // when
         messageHandler.handleMessage(message);
-        Mockito.verify(mongodbClient).insertQuote(message);
+
+        // then
+        Mockito.verify(mongodbClient).insertQuote(argument.capture());
+        Assertions.assertEquals(quote.getIsin(), argument.getValue().getIsin());
+        Assertions.assertEquals(quote.getPrice(), argument.getValue().getPrice());
     }
 
     private String sampleQuoteMessage() {

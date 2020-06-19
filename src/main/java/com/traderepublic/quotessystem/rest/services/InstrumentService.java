@@ -1,4 +1,4 @@
-package com.traderepublic.quotessystem.services;
+package com.traderepublic.quotessystem.rest.services;
 
 import com.traderepublic.quotessystem.data.Instrument;
 import com.traderepublic.quotessystem.data.MongodbClient;

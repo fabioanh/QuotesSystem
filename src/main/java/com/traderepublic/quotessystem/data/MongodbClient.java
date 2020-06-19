@@ -3,10 +3,7 @@ package com.traderepublic.quotessystem.data;
 import com.google.gson.Gson;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Filters;
-import com.mongodb.client.model.Projections;
 import com.mongodb.client.model.Sorts;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
@@ -17,8 +14,11 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.mongodb.client.model.Filters.*;
 
 @Component
 public class MongodbClient {
@@ -58,7 +58,14 @@ public class MongodbClient {
     public void insertInstrument(Instrument instrument) {
         try {
             LOGGER.debug("Inserting instrument with isin {}", instrument.getIsin());
-            instruments.insertOne(instrument);
+            Bson filter = eq("isin", instrument.getIsin());
+            // If instrument found with given ISIN replace it (this in case the app restarts and db is not fresh)
+            // Consider removing it as it adds an overhead to each insertion (although instrument insertion is not so frequent)
+            if(! instruments.find(filter).into(new ArrayList<>()).isEmpty()){
+                instruments.findOneAndReplace(filter, instrument);
+            }else {
+                instruments.insertOne(instrument);
+            }
         } catch (Exception e) {
             LOGGER.error("Failure while inserting message into Mongodb", e);
         }
@@ -76,7 +83,7 @@ public class MongodbClient {
     public void deleteInstrument(Instrument instrument) {
         try {
             LOGGER.debug("Deleting instrument with isin {}", instrument.getIsin());
-            Bson filter = Filters.eq("isin", instrument.getIsin());
+            Bson filter = eq("isin", instrument.getIsin());
             instruments.deleteOne(filter);
         } catch (Exception e) {
             LOGGER.error("Failure deleting element from Mongodb", e);
@@ -86,7 +93,7 @@ public class MongodbClient {
     public void deleteQuotesByIsin(String isin) {
         try {
             LOGGER.debug("Deleting quotes associated to isin {}", isin);
-            Bson filter = Filters.eq("isin", isin);
+            Bson filter = eq("isin", isin);
             quotes.deleteMany(filter);
         } catch (Exception e) {
             LOGGER.error("Failure deleting element from Mongodb", e);
@@ -100,9 +107,20 @@ public class MongodbClient {
     }
 
     public BigDecimal findLastPrice(String isin) {
-        Quote quote = quotes.find(Filters.eq("isin", isin))
+        Quote quote = quotes.find(eq("isin", isin))
                 .sort(Sorts.descending("timestamp"))
                 .limit(1).first();
         return quote != null ? quote.getPrice() : null;
+    }
+
+    public List<Quote> findQuotesBetween(String isin, Instant from, Instant to){
+        return quotes.find(
+                and(
+                        eq("isin", isin),
+                        gte("timestamp", from),
+                        lt("timestamp", to)
+                ))
+                .sort(Sorts.ascending("timestamp"))
+                .into(new ArrayList<>());
     }
 }

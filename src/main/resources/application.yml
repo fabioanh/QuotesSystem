@@ -17,6 +17,6 @@ logging:
   level:
     root: ERROR
     org.springframework.web: ERROR
-    com.traderepublic: INFO
+    com.traderepublic: DEBUG
     org.springframework.messaging: ERROR
     org.springframework.web.socket: ERROR

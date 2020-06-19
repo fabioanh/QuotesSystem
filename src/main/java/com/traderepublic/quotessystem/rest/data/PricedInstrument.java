@@ -2,6 +2,7 @@ package com.traderepublic.quotessystem.rest.data;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Objects;
 
 public class PricedInstrument {
     private final String isin;
@@ -24,5 +25,20 @@ public class PricedInstrument {
 
     public BigDecimal getPrice() {
         return price;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PricedInstrument that = (PricedInstrument) o;
+        return Objects.equals(isin, that.isin) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(price, that.price);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(isin, description, price);
     }
 }

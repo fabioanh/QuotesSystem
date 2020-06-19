@@ -4,6 +4,7 @@ import org.bson.codecs.pojo.annotations.BsonCreator;
 import org.bson.codecs.pojo.annotations.BsonProperty;
 
 import java.time.Instant;
+import java.util.Objects;
 
 public class Instrument {
     private final String isin;
@@ -27,5 +28,20 @@ public class Instrument {
 
     public Instant getTimestamp() {
         return timestamp;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Instrument that = (Instrument) o;
+        return Objects.equals(isin, that.isin) &&
+                Objects.equals(description, that.description) &&
+                Objects.equals(timestamp, that.timestamp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(isin, description, timestamp);
     }
 }

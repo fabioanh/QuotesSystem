@@ -19,7 +19,7 @@ plugins {
     application
 }
 
-java{
+java {
     sourceCompatibility = JavaVersion.VERSION_13
     targetCompatibility = JavaVersion.VERSION_13
 }
@@ -45,16 +45,23 @@ dependencies {
     // MongoDB
     implementation("org.mongodb:mongo-java-driver:3.12.5")
 
+    // Eclipse collections
+    implementation("org.eclipse.collections:eclipse-collections-api:10.2.0")
+    implementation("org.eclipse.collections:eclipse-collections:10.2.0")
+
     // Use JUnit Jupiter API for testing.
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.6.0")
 
     // Mockito
     testImplementation("org.mockito:mockito-core:3.3.3")
 
+    // Spring Test
+    testImplementation("org.springframework:spring-test")
+
     // Use JUnit Jupiter Engine for testing.
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.6.0")
 }
-ext{
+ext {
     set("elasticsearch.version", "7.7.1")
 }
 

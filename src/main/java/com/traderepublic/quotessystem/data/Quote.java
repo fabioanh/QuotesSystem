@@ -5,6 +5,7 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Objects;
 
 public class Quote {
     private final String isin;
@@ -28,5 +29,20 @@ public class Quote {
 
     public Instant getTimestamp() {
         return timestamp;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Quote quote = (Quote) o;
+        return Objects.equals(isin, quote.isin) &&
+                Objects.equals(price, quote.price) &&
+                Objects.equals(timestamp, quote.timestamp);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(isin, price, timestamp);
     }
 }

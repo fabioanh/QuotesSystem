@@ -1,27 +1,38 @@
 package com.traderepublic.quotessystem.clients;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.traderepublic.quotessystem.clients.messages.Instrument;
-import com.traderepublic.quotessystem.clients.messages.Message;
+import com.traderepublic.quotessystem.clients.messages.InstrumentMessage;
+import com.traderepublic.quotessystem.data.MongodbClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Type;
 
 @Component
 public class InstrumentMessageHandler implements ProvidersMessageHandler {
     private final static Logger LOGGER = LoggerFactory.getLogger(InstrumentMessageHandler.class);
 
-    @Override
-    public void handleMessage(String message) {
-        //TODO: Implement further handling
+    @Autowired
+    private MongodbClient mongodbClient;
+
+    public void handleMessage(InstrumentMessage instrumentMessage) {
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Handling of message started for instrument: {}",
+                    new Gson().toJson(instrumentMessage));
+        }
+        switch (instrumentMessage.getType()) {
+            case "ADD":
+                mongodbClient.insertInstrument(instrumentMessage);
+                break;
+            case "DELETE":
+                mongodbClient.deleteInstrument(instrumentMessage);
+                // Delete quotes associated to it in case the isin is reused
+                mongodbClient.deleteQuotesByIsin(instrumentMessage.getData().getIsin());
+                break;
+        }
     }
 
-    @Override
-    public Message<Instrument> parseMessage(String message) {
-
-        return new Gson().fromJson(message, new TypeToken<Message<Instrument>>(){}.getType());
+    public InstrumentMessage parseMessage(String message) {
+        return new Gson().fromJson(message, InstrumentMessage.class);
     }
 }

@@ -1,9 +1,10 @@
 package com.traderepublic.quotessystem.clients;
 
-import com.traderepublic.quotessystem.clients.messages.Message;
+import com.traderepublic.quotessystem.clients.messages.InstrumentMessage;
 
 public interface ProvidersMessageHandler {
-    void handleMessage(String message);
 
-    Message parseMessage(String message);
+//    void handleMessage(InstrumentMessage message);
+
+//    InstrumentMessage parseMessage(String message);
 }
